@@ -25,7 +25,7 @@ def test_browser_and_webdriver(driver, wait):
 def test_assessment_website_accessible(driver, wait, base_url):
     driver.get(base_url + "?route=common/home")
     search = wait.until(EC.visibility_of_element_located(
-        (By.CSS_SELECTOR, "input[placeholder='Search For Products']")
+        (By.CSS_SELECTOR, "#search input[name='search']")
     ))
     assert search.is_enabled()
     assert driver.title == "Your Store"

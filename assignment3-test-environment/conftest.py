@@ -15,9 +15,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
+from tests.opencart import BASE_URL, new_account, register, logout
 
 ROOT = Path(__file__).resolve().parent
-BASE_URL = "https://ecommerce-playground.lambdatest.io/index.php"
 
 
 def pytest_addoption(parser):
@@ -89,6 +89,14 @@ def wait(driver):
 @pytest.fixture
 def base_url():
     return BASE_URL
+
+
+@pytest.fixture
+def account(driver, wait, base_url):
+    credentials = new_account()
+    register(driver, wait, base_url, credentials)
+    logout(driver, wait, base_url)
+    return credentials
 
 
 @pytest.hookimpl(hookwrapper=True)
