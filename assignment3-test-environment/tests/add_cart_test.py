@@ -43,13 +43,16 @@ def add_product(driver, wait, product_name, quantity=1):
     quantity_input.clear()
     quantity_input.send_keys(str(quantity))
 
+    cart_total = wait.until(
+        EC.visibility_of_element_located((By.ID, "cart-total"))
+    )
+    previous_quantity = int(cart_total.text.split()[0])
     driver.find_element(By.ID, "button-cart").click()
 
-    # Wait for the success notification
+    # Wait for the persistent cart state; the success notification is transient.
     wait.until(
-        EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, ".alert-success")
-        )
+        lambda d: int(d.find_element(By.ID, "cart-total").text.split()[0])
+        == previous_quantity + quantity
     )
 
 
