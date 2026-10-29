@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -67,6 +68,21 @@ def get_names(driver, wait):
         card.find_element(By.CSS_SELECTOR, "h4 a").text.strip()
         for card in cards
     ]
+
+
+def get_product_ids(driver, wait):
+    ids = []
+    for card in get_cards(driver, wait):
+        url = card.find_element(By.CSS_SELECTOR, "h4 a").get_attribute("href")
+        product_id = parse_qs(urlparse(url).query).get("product_id")
+        assert product_id, f"Missing product ID in {url}"
+        ids.append(product_id[0])
+    return Counter(ids)
+
+
+def assert_products_unchanged(driver, wait, expected):
+    actual = get_product_ids(driver, wait)
+    assert actual == expected, f"Sorting changed the products: {expected} -> {actual}"
 
 
 def get_prices(driver, wait):
@@ -145,8 +161,10 @@ def get_models(driver, wait):
 @pytest.mark.online
 def test_sort_by_name(driver, wait):
     open_category(driver, wait)
+    original_products = get_product_ids(driver, wait)
 
     select_sort(driver, wait, "sort=pd.name&order=ASC")
+    assert_products_unchanged(driver, wait, original_products)
     names_asc = get_names(driver, wait)
 
     assert len(names_asc) > 1
@@ -155,6 +173,7 @@ def test_sort_by_name(driver, wait):
     ), f"Name ascending failed: {names_asc}"
 
     select_sort(driver, wait, "sort=pd.name&order=DESC")
+    assert_products_unchanged(driver, wait, original_products)
     names_desc = get_names(driver, wait)
 
     assert names_desc == sorted(
@@ -168,8 +187,10 @@ def test_sort_by_name(driver, wait):
 @pytest.mark.online
 def test_sort_by_price(driver, wait):
     open_category(driver, wait)
+    original_products = get_product_ids(driver, wait)
 
     select_sort(driver, wait, "sort=p.price&order=ASC")
+    assert_products_unchanged(driver, wait, original_products)
     prices_asc = get_prices(driver, wait)
 
     assert len(prices_asc) > 1
@@ -178,6 +199,7 @@ def test_sort_by_price(driver, wait):
     ), f"Price ascending failed: {prices_asc}"
 
     select_sort(driver, wait, "sort=p.price&order=DESC")
+    assert_products_unchanged(driver, wait, original_products)
     prices_desc = get_prices(driver, wait)
 
     assert prices_desc == sorted(
@@ -191,8 +213,10 @@ def test_sort_by_price(driver, wait):
 @pytest.mark.online
 def test_sort_by_model(driver, wait):
     open_category(driver, wait)
+    original_products = get_product_ids(driver, wait)
 
     select_sort(driver, wait, "sort=p.model&order=ASC")
+    assert_products_unchanged(driver, wait, original_products)
     models_asc = get_models(driver, wait)
 
     assert len(models_asc) > 1
@@ -203,6 +227,7 @@ def test_sort_by_model(driver, wait):
     open_category(driver, wait)
 
     select_sort(driver, wait, "sort=p.model&order=DESC")
+    assert_products_unchanged(driver, wait, original_products)
     models_desc = get_models(driver, wait)
 
     assert models_desc == sorted(

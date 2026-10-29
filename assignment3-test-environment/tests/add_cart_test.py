@@ -94,6 +94,8 @@ def get_cart_items(driver):
             quantity_inputs[0].get_attribute("value")
         )
 
+        # These scenarios use products without options, so each has one cart row.
+        assert name not in items, f"Duplicate cart row for {name}"
         items[name] = quantity
 
     return items

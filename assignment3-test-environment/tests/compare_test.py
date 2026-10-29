@@ -102,11 +102,14 @@ def remove_product(driver, wait, product_name):
         f"{len(remove_buttons)}"
     )
 
+    previous_table = driver.find_element(By.CSS_SELECTOR, "#content table")
     remove_buttons[index].click()
-
-    wait.until(
-        lambda d: product_name not in get_compared_products(d)
-    )
+    wait.until(EC.staleness_of(previous_table))
+    wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#content")))
+    # All current removal scenarios leave another product in the table.
+    if len(products) > 1:
+        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#content table")))
+    assert product_name not in get_compared_products(driver)
 
 
 # Test Scenario 1: Compare a single product
