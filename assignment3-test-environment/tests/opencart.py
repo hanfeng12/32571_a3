@@ -44,16 +44,15 @@ def register(driver, wait, base_url, account):
     fill_registration(driver, wait, base_url, account)
     submit_registration(driver)
     wait.until(lambda d: route_is(d, "account/success"))
-    heading = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#content h1")))
-    assert heading.text == "Your Account Has Been Created!"
+    content = wait.until(EC.visibility_of_element_located((By.ID, "content")))
+    assert "Your new account has been successfully created!" in content.text
 
 
 def logout(driver, wait, base_url):
     driver.get(base_url + "?route=account/logout")
     wait.until(lambda d: route_is(d, "account/logout"))
-    assert wait.until(EC.visibility_of_element_located(
-        (By.CSS_SELECTOR, "#content h1")
-    )).text == "Account Logout"
+    content = wait.until(EC.visibility_of_element_located((By.ID, "content")))
+    assert "You have been logged off your account." in content.text
 
 
 def submit_login(driver, wait, base_url, email, password):
@@ -66,6 +65,6 @@ def submit_login(driver, wait, base_url, email, password):
 def login(driver, wait, base_url, account):
     submit_login(driver, wait, base_url, account["email"], account["password"])
     wait.until(lambda d: route_is(d, "account/account"))
-    assert wait.until(EC.visibility_of_element_located(
-        (By.CSS_SELECTOR, "#content h2")
-    )).text == "My Account"
+    wait.until(EC.visibility_of_element_located(
+        (By.CSS_SELECTOR, "#content a[href*='route=account/edit']")
+    ))

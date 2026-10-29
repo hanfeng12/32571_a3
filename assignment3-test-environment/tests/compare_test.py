@@ -40,17 +40,18 @@ def add_to_compare(driver, wait, product_name):
 
     compare_button = wait.until(
         EC.element_to_be_clickable(
-            (By.CSS_SELECTOR, "button[onclick*='compare.add']")
+            (By.CSS_SELECTOR, f"button[onclick=\"compare.add('{PRODUCTS[product_name]}');\"]")
         )
     )
 
     compare_button.click()
 
-    wait.until(
+    alert = wait.until(
         EC.visibility_of_element_located(
             (By.CSS_SELECTOR, ".alert-success")
         )
     )
+    assert product_name in alert.text
 
 
 def open_compare(driver, wait):
