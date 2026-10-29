@@ -3,15 +3,14 @@ from urllib.parse import parse_qs, urlparse
 
 import pytest
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 
 
 # F4 - Sort
-CATEGORY_URL = (
-    "https://opencart.abstracta.us/"
-    "index.php?route=product/category&path=20&limit=100"
-)
+from tests.opencart import BASE_URL
+
+CATEGORY_URL = BASE_URL + "?route=product/category&path=20&limit=100"
 
 
 def open_category(driver, wait):
@@ -40,15 +39,11 @@ def select_sort(driver, wait, keyword):
     assert selected is not None, f"Sort option not found: {keyword}"
 
     expected_value = selected.get_attribute("value")
+    previous_select = dropdown._el
     dropdown.select_by_value(expected_value)
-
-    wait.until(
-        lambda d: parse_qs(
-            urlparse(d.current_url).query
-        ).get("order") == [keyword.split("order=")[-1]]
-        if "order=" in keyword else
-        expected_value == d.current_url
-    )
+    wait.until(EC.staleness_of(previous_select))
+    expected_query = parse_qs(urlparse(expected_value).query)
+    wait.until(lambda d: parse_qs(urlparse(d.current_url).query) == expected_query)
 
     wait.until(
         EC.presence_of_all_elements_located(

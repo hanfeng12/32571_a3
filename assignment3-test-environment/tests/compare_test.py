@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 # F6 - Product Compare
-BASE_URL = "https://opencart.abstracta.us/index.php"
+from tests.opencart import BASE_URL
 
 PRODUCTS = {
     "iMac": 41,
